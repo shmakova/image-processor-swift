@@ -7,38 +7,48 @@ public class ImageProcessor {
         self.image = image
     }
     
-    public func apply(filter: String) -> UIImage {
-        var imageRGBA = RGBAImage(image: image)!
-        
-        switch filter {
-        case "Gray Scale":
-            let grayScaleFilter = GrayScaleFilter()
-            imageRGBA = grayScaleFilter.apply(imageRGBA)
-        case "Sepia":
-            let sepiaFilter = SepiaFilter()
-            imageRGBA = sepiaFilter.apply(imageRGBA)
-        case "Negative":
-            let negativeFilter = NegativeFilter()
-            imageRGBA = negativeFilter.apply(imageRGBA)
-        case "Contrast 50%":
-            let contrastFilter = ContrastFilter(contrastLevel: 50)
-            imageRGBA = contrastFilter.apply(imageRGBA)
-        case "Contrast -50%":
-            let contrastFilter = ContrastFilter(contrastLevel: -50)
-            imageRGBA = contrastFilter.apply(imageRGBA)
-        default: print("Bad filter: ", filter)
-        }
-        
-        
-        let newImage = imageRGBA.toUIImage()!
-        return newImage
+    public func apply(filterName: String) -> UIImage {
+        let filter = getFilterByName(filterName)!;
+        return apply(filter);
     }
     
     public func apply(filter: Filter) -> UIImage {
         var imageRGBA = RGBAImage(image: image)!
-        imageRGBA = filter.apply(imageRGBA)
-        let newImage = imageRGBA.toUIImage()!
-        return newImage
+        imageRGBA = applyFilter(imageRGBA, filter: filter);
+        return imageRGBA.toUIImage()!;
+    }
+
+    public func apply(filterNames: [String]) -> UIImage {
+        var imageRGBA = RGBAImage(image: image)!
+        
+        for filterName in filterNames {
+            let filter = getFilterByName(filterName)!;
+            imageRGBA = applyFilter(imageRGBA, filter: filter);
+        }
+        
+        return imageRGBA.toUIImage()!;
+    }
+    
+    func applyFilter(var imageRGBA: RGBAImage, filter: Filter?) -> RGBAImage {
+        imageRGBA = filter!.apply(imageRGBA);
+        return imageRGBA;
+    }
+    
+    func getFilterByName(filterName: String) -> Filter? {
+        switch filterName {
+            case "Gray Scale":
+                return GrayScaleFilter();
+            case "Sepia":
+                return SepiaFilter();
+            case "Negative":
+                return NegativeFilter();
+            case "Contrast 100%":
+                return ContrastFilter(contrastLevel: 100);
+            case "Contrast -50%":
+                return ContrastFilter(contrastLevel: -50);
+        default: print("Bad filter: ", filterName);
+            return nil;
+        }
     }
 }
 

@@ -20,12 +20,12 @@ public class ImageProcessor {
         case "Negative":
             let negativeFilter = NegativeFilter()
             imageRGBA = negativeFilter.apply(imageRGBA)
-        case "Brightness 50%":
-            let brightnessFilter = BrightnessFilter(brightnessLevel: 50)
-            imageRGBA = brightnessFilter.apply(imageRGBA)
-        case "Brightness -50%":
-            let brightnessFilter = BrightnessFilter(brightnessLevel: -50)
-            imageRGBA = brightnessFilter.apply(imageRGBA)
+        case "Contrast 50%":
+            let contrastFilter = ContrastFilter(contrastLevel: 50)
+            imageRGBA = contrastFilter.apply(imageRGBA)
+        case "Contrast -50%":
+            let contrastFilter = ContrastFilter(contrastLevel: -50)
+            imageRGBA = contrastFilter.apply(imageRGBA)
         default: print("Bad filter: ", filter)
         }
         
@@ -33,13 +33,20 @@ public class ImageProcessor {
         let newImage = imageRGBA.toUIImage()!
         return newImage
     }
+    
+    public func apply(filter: Filter) -> UIImage {
+        var imageRGBA = RGBAImage(image: image)!
+        imageRGBA = filter.apply(imageRGBA)
+        let newImage = imageRGBA.toUIImage()!
+        return newImage
+    }
 }
 
-protocol Filter {
+public protocol Filter {
     func apply(imageRGBA: RGBAImage) -> RGBAImage
 }
 
-class CoefFilter: Filter {
+public class CoefFilter: Filter {
     var redCoefs: Array<Double> = [1.0, 1.0, 1.0]
     var greenCoefs: Array<Double> = [1.0, 1.0, 1.0]
     var blueCoefs: Array<Double> = [1.0, 1.0, 1.0]
@@ -54,7 +61,7 @@ class CoefFilter: Filter {
     
     init() {}
     
-    func apply(imageRGBA: RGBAImage) -> RGBAImage {
+    public func apply(imageRGBA: RGBAImage) -> RGBAImage {
         for y in 0..<imageRGBA.height {
             for x in 0..<imageRGBA.width {
                 let index = y * imageRGBA.width + x
@@ -77,7 +84,7 @@ class CoefFilter: Filter {
     }
 }
 
-class GrayScaleFilter: CoefFilter {
+public class GrayScaleFilter: CoefFilter {
     override init() {
         super.init(
             redCoefs: [0.2126, 0.2126, 0.2126],
@@ -88,7 +95,7 @@ class GrayScaleFilter: CoefFilter {
     }
 }
 
-class SepiaFilter: CoefFilter {
+public class SepiaFilter: CoefFilter {
     override init() {
         super.init(
             redCoefs: [0.393, 0.349, 0.272],
@@ -99,8 +106,8 @@ class SepiaFilter: CoefFilter {
     }
 }
 
-class NegativeFilter: Filter {
-    func apply(imageRGBA: RGBAImage) -> RGBAImage {
+public class NegativeFilter: Filter {
+    public func apply(imageRGBA: RGBAImage) -> RGBAImage {
         for y in 0..<imageRGBA.height {
             for x in 0..<imageRGBA.width {
                 let index = y * imageRGBA.width + x
@@ -117,17 +124,17 @@ class NegativeFilter: Filter {
 }
 
 
-class BrightnessFilter: Filter {
-    var brightnessLevel: Int
+public class ContrastFilter: Filter {
+    var contrastLevel: Int
     
-    init(brightnessLevel: Int) {
-        self.brightnessLevel = brightnessLevel * 128 / 100
+    init(contrastLevel: Int) {
+        self.contrastLevel = contrastLevel * 128 / 100
     }
     
-    func apply(imageRGBA: RGBAImage) -> RGBAImage {
+    public func apply(imageRGBA: RGBAImage) -> RGBAImage {
         var factor: Double
-        let factorNumerator = Double(259 * (brightnessLevel + 255))
-        let factorDenumerator = Double(255 * (259 - brightnessLevel))
+        let factorNumerator = Double(259 * (contrastLevel + 255))
+        let factorDenumerator = Double(255 * (259 - contrastLevel))
         factor = factorNumerator / factorDenumerator
         
         for y in 0..<imageRGBA.height {
